@@ -9,7 +9,7 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		paths: {
-			base: '/nom-du-repo' // remplacez par le nom exact du repo
+			base: '/ma-eva' // remplacez par le nom exact du repo
 		}
 	}
 };
