@@ -28,7 +28,7 @@
   on:keydown={handleKey}
 >
   {#each hearts as h (h.id)}
-    <span class="pointer-events-none fixed text-pink-500 animate-heart select-none" style={`left:${h.x}px; top:${h.y}px`} aria-hidden="true">❤️</span>
+    <span class="pointer-events-none fixed text-pink-500 animate-float animate-fade select-none" style={`left:${h.x}px; top:${h.y}px`} aria-hidden="true">❤️</span>
   {/each}
 
   <h1 class="text-2xl sm:text-3xl text-pink-600 font-bold mb-4 sm:mb-6 text-center">Poésies ✨</h1>
@@ -70,7 +70,9 @@
 </div>
 
 <style>
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }
-  @keyframes floatUp { 0%{transform:translateY(0);opacity:1;} 100%{transform:translateY(-10px);opacity:0.8;} }
-  .animate-heart { animation: floatUp 1.8s ease-out forwards; will-change: transform, opacity; font-size:1.25rem; }
+  .animate-fade { animation: fadeIn 1s ease forwards; opacity: 0; }
+  .animate-fade-delay { animation: fadeIn 1.6s ease forwards; opacity: 0; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-float { animation: floatUp 2s ease-out forwards; }
+  @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.3); opacity: 0; } }
 </style>

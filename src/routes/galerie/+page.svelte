@@ -62,7 +62,7 @@
   </div>
 
   {#each hearts as h (h.id)}
-    <span class="fixed pointer-events-none select-none text-pink-500 text-2xl heart-float" style={`left:${h.x}px; top:${h.y}px`} aria-hidden="true">💖</span>
+    <span class="fixed pointer-events-none select-none text-pink-500 text-2xl animate-fade animate-float" style={`left:${h.x}px; top:${h.y}px`} aria-hidden="true">💖</span>
   {/each}
 
   <a href={`${base}/`} class="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-[calc(env(safe-area-inset-right)+1rem)] inline-flex items-center gap-2 px-5 py-3 rounded-full bg-pink-500 text-white shadow-lg hover:bg-pink-600 active:scale-[0.98] transition">
@@ -86,8 +86,9 @@
 {/if}
 
 <style>
-  @keyframes floatUp {0%{transform:translateY(0);opacity:1}100%{transform:translateY(-10px);opacity:0.8}}
-  .animate-float{animation:floatUp 1.2s ease-in-out infinite alternate}
-  @keyframes heartFloat{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-80%) scale(1.2);opacity:0}}
-  .heart-float{transform:translate(-50%,-50%);animation:heartFloat 2s ease-in-out forwards}
+  .animate-fade { animation: fadeIn 1s ease forwards; opacity: 0; }
+  .animate-fade-delay { animation: fadeIn 1.6s ease forwards; opacity: 0; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-float { animation: floatUp 2s ease-out forwards; }
+  @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.3); opacity: 0; } }
 </style>
