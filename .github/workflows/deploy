@@ -1,0 +1,40 @@
+name: Deploy SvelteKit to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Branche à partir de laquelle déployer
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Récupérer le code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Installer Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 3️⃣ Installer les dépendances
+      - name: Install dependencies
+        run: npm ci
+
+      # 4️⃣ Build SvelteKit en mode production
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      # 5️⃣ Déployer sur GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build  # Sortie de adapter-static
+          # Base path utilisé dans ton svelte.config.js
+          # On ne touche pas aux fichiers, ils utilisent déjà /ma-eva
