@@ -1,17 +1,12 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-/** @type {import('@sveltejs/kit').Config} */
-const config = {
-	// Consult https://svelte.dev/docs/kit/integrations
-	// for more information about preprocessors
-	preprocess: vitePreprocess(),
-	kit: {
-		adapter: adapter(),
-		paths: {
-			base: '/ma-eva' // remplacez par le nom exact du repo
-		}
-	}
+export default {
+  preprocess: vitePreprocess(),
+  kit: {
+      adapter: adapter(),
+      paths: { base: '/ma-eva' },
+    prerender: { entries: ['*'] } // génère /index.html, /galerie/index.html, /poesies/index.html
+    // trailingSlash: 'always' // optionnel, aide parfois sur Pages
+  }
 };
-
-export default config;
