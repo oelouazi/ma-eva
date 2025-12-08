@@ -1,8 +1,7 @@
 ﻿<script lang="ts">
   import { snaps } from '$lib/image';
   import { onMount } from 'svelte';
-
-  
+  import { base } from '$app/paths';
 
   let visible: boolean[] = [];
   let modalOpen = false;
@@ -13,19 +12,16 @@
 
   function addHeart(e: MouseEvent) {
     const id = count++;
-    // Use viewport coordinates (clientX/clientY) to position with fixed overlay
     hearts = [...hearts, { id, x: e.clientX, y: e.clientY }];
-    // Remove by id to avoid removing the wrong element when multiple timeouts overlap
     setTimeout(() => {
       hearts = hearts.filter((h) => h.id !== id);
     }, 2000);
   }
 
-  // Zoom doux
   const ZOOM_MIN = 1.2;
   const ZOOM_MAX = 2;
   const ZOOM_STEP = 0.15;
-  let zoom = ZOOM_MIN; // initialiser le zoom au minimum pour éviter les sauts
+  let zoom = ZOOM_MIN;
 
   onMount(() => {
     visible = snaps.map(() => false);
@@ -41,7 +37,7 @@
       if (e.key === 'Escape') closeModal();
       if (e.key === 'ArrowRight') next();
       if (e.key === 'ArrowLeft') prev();
-      if (e.key === '+' || e.key === '=') zoomIn(); // couvrir clavier FR/US
+      if (e.key === '+' || e.key === '=') zoomIn();
       if (e.key === '-') zoomOut();
     };
     window.addEventListener('keydown', onKey);
@@ -65,25 +61,23 @@
     selectedIndex = (selectedIndex - 1 + snaps.length) % snaps.length;
     zoom = ZOOM_MIN;
   }
-  function zoomIn() {
-    zoom = Math.min(zoom + ZOOM_STEP, ZOOM_MAX);
-  }
-  function zoomOut() {
-    zoom = Math.max(zoom - ZOOM_STEP, ZOOM_MIN);
-  }
+  function zoomIn() { zoom = Math.min(zoom + ZOOM_STEP, ZOOM_MAX); }
+  function zoomOut() { zoom = Math.max(zoom - ZOOM_STEP, ZOOM_MIN); }
   function onWheelZoom(e: WheelEvent) {
     if (!modalOpen) return;
     e.preventDefault();
     const direction = Math.sign(e.deltaY);
-    if (direction > 0) {
-      zoomOut();
-    } else if (direction < 0) {
-      zoomIn();
-    }
+    if (direction > 0) zoomOut();
+    else if (direction < 0) zoomIn();
   }
 </script>
 
-<div class="min-h-screen bg-pink-100 px-4 sm:px-6 py-6" on:click={addHeart}>
+<div
+  role="button"
+  tabindex="0"
+  class="min-h-screen bg-pink-100 px-4 sm:px-6 py-6"
+  on:click={addHeart}
+>
   <h1 class="text-center text-2xl sm:text-3xl text-pink-600 font-bold mb-4 sm:mb-6">Tes snaps 😍</h1>
 
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
@@ -94,11 +88,8 @@
           alt="Snap"
           class="rounded-xl shadow-lg transition duration-300 ease-out
                  hover:scale-105 hover:rotate-1 active:scale-105 active:rotate-1
-                 cursor-pointer"
-          class:opacity-100={visible[i]}
-          class:translate-y-0={visible[i]}
-          class:opacity-0={!visible[i]}
-          class:translate-y-6={!visible[i]}
+                 cursor-pointer
+                 {visible[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}"
           loading="lazy"
           on:click={() => openModal(i)}
         />
@@ -107,8 +98,9 @@
     {/each}
   </div>
 
+  <!-- Bouton retour -->
   <a
-    href="/"
+    href="{base}/"
     class="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-[calc(env(safe-area-inset-right)+1rem)]
            inline-flex items-center gap-2 px-5 py-3 rounded-full bg-pink-500 text-white shadow-lg
            hover:bg-pink-600 active:scale-[0.98] transition"
@@ -121,7 +113,7 @@
   </a>
 </div>
 
-<!-- Hearts overlay rendered using fixed positioning to match viewport coordinates -->
+<!-- Cœurs flottants -->
 {#each hearts as h (h.id)}
   <span
     class="fixed pointer-events-none select-none text-pink-500 text-2xl heart-float"
@@ -130,6 +122,7 @@
   >💖</span>
 {/each}
 
+<!-- Modal -->
 {#if modalOpen}
   <div
     class="fixed inset-0 bg-black/70 z-40 flex items-center justify-center"
@@ -145,33 +138,22 @@
         draggable="false"
       />
 
-      <button
-        class="absolute top-4 right-4 bg-white/80 hover:bg-white text-black rounded-full px-3 py-1 shadow"
-        on:click={closeModal}
-        aria-label="Fermer"
-      >✕</button>
+      <button class="absolute top-4 right-4 bg-white/80 hover:bg-white text-black rounded-full px-3 py-1 shadow" on:click={closeModal} aria-label="Fermer">✕</button>
 
       <div class="absolute bottom-[calc(env(safe-area-inset-bottom)+1rem)] left-1/2 -translate-x-1/2 flex gap-2">
         <button class="bg-white/80 hover:bg-white text-black rounded px-3 py-1 shadow" on:click={zoomOut} aria-label="Zoom -">−</button>
         <button class="bg-white/80 hover:bg-white text-black rounded px-3 py-1 shadow" on:click={zoomIn} aria-label="Zoom +">+</button>
       </div>
 
-      <button
-        class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black rounded-full w-10 h-10 flex items-center justify-center shadow"
-        on:click={prev}
-        aria-label="Précédent"
-      >❮</button>
-      <button
-        class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black rounded-full w-10 h-10 flex items-center justify-center shadow"
-        on:click={next}
-        aria-label="Suivant"
-      >❯</button>
+      <button class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black rounded-full w-10 h-10 flex items-center justify-center shadow" on:click={prev} aria-label="Précédent">❮</button>
+      <button class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black rounded-full w-10 h-10 flex items-center justify-center shadow" on:click={next} aria-label="Suivant">❯</button>
     </div>
   </div>
 {/if}
 
 <style>
   img { transition-property: transform, opacity; }
+
   @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-10px); opacity: 0.8; } }
   .animate-float { animation: floatUp 1.2s ease-in-out infinite alternate; }
 
@@ -179,8 +161,5 @@
     0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     100% { transform: translate(-50%, -80%) scale(1.2); opacity: 0; }
   }
-  .heart-float {
-    transform: translate(-50%, -50%);
-    animation: heartFloat 2s ease-in-out forwards;
-  }
+  .heart-float { transform: translate(-50%, -50%); animation: heartFloat 2s ease-in-out forwards; }
 </style>
