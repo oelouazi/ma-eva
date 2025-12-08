@@ -7,6 +7,8 @@ export default {
   preprocess: vitePreprocess(),
   kit: {
     adapter: adapter(),
-    paths: { base: isDev ? '' : '/ma-eva' }
+    paths: {
+      base: isDev ? '' : '/ma-eva' // ton sous-chemin GitHub Pages
+    }
   }
 };
