@@ -2,15 +2,30 @@
   import { snaps } from '$lib/image';
   import { onMount } from 'svelte';
 
+  
+
   let visible: boolean[] = [];
   let modalOpen = false;
   let selectedIndex = 0;
 
+  let hearts: { id: number; x: number; y: number }[] = [];
+  let count = 0;
+
+  function addHeart(e: MouseEvent) {
+    const id = count++;
+    // Use viewport coordinates (clientX/clientY) to position with fixed overlay
+    hearts = [...hearts, { id, x: e.clientX, y: e.clientY }];
+    // Remove by id to avoid removing the wrong element when multiple timeouts overlap
+    setTimeout(() => {
+      hearts = hearts.filter((h) => h.id !== id);
+    }, 2000);
+  }
+
   // Zoom doux
-  let zoom = 0.9;
-  const ZOOM_MIN = 0.9;
+  const ZOOM_MIN = 1.2;
   const ZOOM_MAX = 2;
   const ZOOM_STEP = 0.15;
+  let zoom = ZOOM_MIN; // initialiser le zoom au minimum pour éviter les sauts
 
   onMount(() => {
     visible = snaps.map(() => false);
@@ -26,7 +41,7 @@
       if (e.key === 'Escape') closeModal();
       if (e.key === 'ArrowRight') next();
       if (e.key === 'ArrowLeft') prev();
-      if (e.key === '+') zoomIn();
+      if (e.key === '+' || e.key === '=') zoomIn(); // couvrir clavier FR/US
       if (e.key === '-') zoomOut();
     };
     window.addEventListener('keydown', onKey);
@@ -56,9 +71,19 @@
   function zoomOut() {
     zoom = Math.max(zoom - ZOOM_STEP, ZOOM_MIN);
   }
+  function onWheelZoom(e: WheelEvent) {
+    if (!modalOpen) return;
+    e.preventDefault();
+    const direction = Math.sign(e.deltaY);
+    if (direction > 0) {
+      zoomOut();
+    } else if (direction < 0) {
+      zoomIn();
+    }
+  }
 </script>
 
-<div class="min-h-screen bg-pink-100 px-4 sm:px-6 py-6">
+<div class="min-h-screen bg-pink-100 px-4 sm:px-6 py-6" on:click={addHeart}>
   <h1 class="text-center text-2xl sm:text-3xl text-pink-600 font-bold mb-4 sm:mb-6">Tes snaps 😍</h1>
 
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
@@ -77,12 +102,11 @@
           loading="lazy"
           on:click={() => openModal(i)}
         />
-        <span class="pointer-events-none absolute -top-2 -right-2 hidden group-hover:block text-pink-400 text-xl animate-float">✨</span>
+        <span class="pointer-events-none absolute -top-2 -right-2 hidden group-hover:block text-pink-400 text-xl animate-float" aria-hidden="true">✨</span>
       </div>
     {/each}
   </div>
 
-  <!-- Bouton fixe bas droite avec zones sûres iOS -->
   <a
     href="/"
     class="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-[calc(env(safe-area-inset-right)+1rem)]
@@ -90,24 +114,34 @@
            hover:bg-pink-600 active:scale-[0.98] transition"
     aria-label="Retour à l'accueil"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 3.172 3.172 12H5v8h5v-5h4v5h5 v-8h1.828L12 3.172z"/>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 3.172 3.172 12H5v8h5v-5h4v5h5v-8h1.828L12 3.172z"/>
     </svg>
     Accueil
   </a>
 </div>
 
+<!-- Hearts overlay rendered using fixed positioning to match viewport coordinates -->
+{#each hearts as h (h.id)}
+  <span
+    class="fixed pointer-events-none select-none text-pink-500 text-2xl heart-float"
+    style={`left:${h.x}px; top:${h.y}px`}
+    aria-hidden="true"
+  >💖</span>
+{/each}
+
 {#if modalOpen}
   <div
     class="fixed inset-0 bg-black/70 z-40 flex items-center justify-center"
     on:click={(e) => e.target === e.currentTarget && closeModal()}
+    on:wheel|passive={onWheelZoom}
   >
     <div class="relative z-50 max-w-[92vw] max-h-[92vh] flex items-center justify-center">
       <img
         src={snaps[selectedIndex]}
         alt="Snap en grand"
         class="select-none max-w-[92vw] max-h-[82vh] object-contain"
-        style={`transform: scale(${zoom}); transform-origin: center; transition: transform 200ms ease`}
+        style={`transform: scale(${zoom}); transform-origin: center; transition: transform 200ms ease;`}
         draggable="false"
       />
 
@@ -140,4 +174,13 @@
   img { transition-property: transform, opacity; }
   @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-10px); opacity: 0.8; } }
   .animate-float { animation: floatUp 1.2s ease-in-out infinite alternate; }
+
+  @keyframes heartFloat {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -80%) scale(1.2); opacity: 0; }
+  }
+  .heart-float {
+    transform: translate(-50%, -50%);
+    animation: heartFloat 2s ease-in-out forwards;
+  }
 </style>

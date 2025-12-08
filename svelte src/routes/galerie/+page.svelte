@@ -1,6 +1,7 @@
 ﻿<script lang="ts">
   import { snaps } from '$lib/image';
   import { onMount } from 'svelte';
+  import { base } from '$app/paths';
 
   let visible: boolean[] = [];
 
@@ -22,7 +23,7 @@
     {#each snaps as snap, i}
       <div class="relative group">
         <img
-          src={snap}
+          src={`${base}${snap}`}
           alt="Snap"
           class="rounded-xl shadow-lg transition duration-500 ease-out hover:scale-105 hover:rotate-1 cursor-pointer"
           class:opacity-100={visible[i]}
