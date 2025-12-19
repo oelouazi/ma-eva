@@ -50,6 +50,9 @@
 		<a href={`${base}/poesies`} class="px-5 py-3 sm:px-6 sm:py-3 bg-pink-500 text-white rounded-xl shadow-lg hover:bg-pink-600 active:scale-[0.98] transition">
 			Poésies ✨
 		</a>
+		<a href={`${base}/pensées`} class="px-5 py-3 sm:px-6 sm:py-3 bg-pink-500 text-white rounded-xl shadow-lg hover:bg-pink-600 active:scale-[0.98] transition">
+			Pensées 🧠
+		</a>
 	</div>
 
 	{#each hearts as heart (heart.id)}
